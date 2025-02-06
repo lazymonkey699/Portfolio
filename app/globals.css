@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 20% 98%;
+    --border: 240 3.7% 15.9%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground dark:bg-gray-900 dark:text-white;
+  }
+}
+
+@layer utilities {
+  .custom-border {
+    border-color: var(--border);
+  }
+}
+
+.space-background {
+  background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+
+.star {
+  background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0) 80%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: twinkle 3s infinite;
+  will-change: transform, opacity;
+}
+
+.shooting-star {
+  width: 2px;
+  height: 100px;
+  background: linear-gradient(to bottom, var(--foreground), transparent);
+  transform: rotate(-45deg);
+  animation: shooting 2s linear infinite;
+  opacity: 0.8;
+  will-change: transform, opacity;
+}
+
+@keyframes shooting {
+  0% {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200px) translateY(100px);
+    opacity: 0;
+  }
+}
+
+.typing-animation {
+  overflow: hidden;
+  border-right: 0.15em solid var(--foreground);
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.15em;
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: var(--foreground); }
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, #ff00ff, #00ffff);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.custom-card-hover {
+  transition: all 0.3s ease;
+}
+
+.custom-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-foreground);
+}
