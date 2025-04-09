@@ -18,6 +18,7 @@ type Star = {
   animationDelay: string;
   color: string;
   opacity: number;
+  depth: number;
 };
 
 type ShootingStar = {
@@ -28,17 +29,16 @@ type ShootingStar = {
   animationDuration: string;
   tailLength: string;
   animationDelay: string;
-  rotation: number; // New property for varied curves
+  rotation: number;
 };
 
 const SpaceBackground = () => {
   const [stars, setStars] = useState<Star[]>([]);
   const [shootingStars, setShootingStars] = useState<ShootingStar[]>([]);
 
-  // Parallax effect
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 4; // Increased for more noticeable effect
+      const x = (e.clientX / window.innerWidth - 0.5) * 4;
       const y = (e.clientY / window.innerHeight - 0.5) * 4;
       document.documentElement.style.setProperty("--parallax-x", `${x}px`);
       document.documentElement.style.setProperty("--parallax-y", `${y}px`);
@@ -47,32 +47,65 @@ const SpaceBackground = () => {
     return () => window.removeEventListener("mousemove", handler);
   }, []);
 
-  // Generate stars and shooting stars
   useEffect(() => {
-    const generatedStars = Array.from({ length: 100 }).map((_, i) => ({
-      id: i,
-      top: `${randomValue(0, 100)}%`,
-      left: `${randomValue(0, 100)}%`,
-      size: `${randomValue(0.8, 2.5)}px`, // Wider size range for variety
-      animationDelay: `${randomValue(0, 5)}s`,
-      color: getStarColor(),
-      opacity: randomValue(0.2, 0.8), // Broader opacity range
-    }));
-
-    const generatedShootingStars = Array.from({ length: 4 }).map((_, i) => ({
-      id: i,
-      top: `${randomValue(5, 85)}%`, // Adjusted range for better distribution
-      left: `${randomValue(0, 20)}%`,
-      size: `2px`,
-      animationDuration: `${randomValue(1.5, 3)}s`, // Slightly faster range
-      tailLength: `${randomValue(50, 100)}px`, // Longer possible tails
-      animationDelay: `${randomValue(5, 20)}s`, // More frequent appearances
-      rotation: randomValue(5, 15), // Random rotation for varied curves
-    }));
-
+    const layers = 3;
+    const generatedStars: Star[] = [];
+    for (let depth = 0; depth < layers; depth++) {
+      const count = 30 - depth * 5;
+      for (let i = 0; i < count; i++) {
+        generatedStars.push({
+          id: depth * 100 + i,
+          top: `${randomValue(0, 100)}%`,
+          left: `${randomValue(0, 100)}%`,
+          size: `${randomValue(0.8, 2.5 - depth)}px`,
+          animationDelay: `${randomValue(0, 5)}s`,
+          color: getStarColor(),
+          opacity: randomValue(0.2, 0.8),
+          depth,
+        });
+      }
+    }
     setStars(generatedStars);
-    setShootingStars(generatedShootingStars);
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const id = Date.now();
+      const newStar: ShootingStar = {
+        id,
+        top: `${randomValue(5, 85)}%`,
+        left: `${randomValue(0, 20)}%`,
+        size: `2px`,
+        animationDuration: `${randomValue(1.5, 3)}s`,
+        tailLength: `${randomValue(50, 100)}px`,
+        animationDelay: `0s`,
+        rotation: randomValue(5, 15),
+      };
+      setShootingStars((prev) => [...prev, newStar]);
+      setTimeout(() => {
+        setShootingStars((prev) => prev.filter((s) => s.id !== id));
+      }, 3000);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleClick = (e: React.MouseEvent) => {
+    const id = Date.now();
+    const newStar: ShootingStar = {
+      id,
+      top: `${(e.clientY / window.innerHeight) * 100}%`,
+      left: `${(e.clientX / window.innerWidth) * 100}%`,
+      size: `2px`,
+      animationDuration: `2s`,
+      tailLength: `${randomValue(50, 100)}px`,
+      animationDelay: `0s`,
+      rotation: randomValue(-20, 20),
+    };
+    setShootingStars((prev) => [...prev, newStar]);
+    setTimeout(() => {
+      setShootingStars((prev) => prev.filter((s) => s.id !== id));
+    }, 2000);
+  };
 
   return (
     <div
@@ -81,9 +114,10 @@ const SpaceBackground = () => {
       style={{
         transform: "translate(var(--parallax-x, 0), var(--parallax-y, 0))",
         transition: "transform 0.2s ease-out",
+        zIndex: -1,
       }}
+      onClick={handleClick}
     >
-      {/* Dim background image */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{
@@ -91,15 +125,20 @@ const SpaceBackground = () => {
         }}
       />
 
-      {/* Nebula overlay */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(circle at 70% 30%, rgba(100, 150, 255, 0.3), transparent 70%)",
+          background: "linear-gradient(120deg, rgba(0, 255, 200, 0.08), rgba(0, 100, 255, 0.06), transparent)",
+          backgroundSize: "200% 200%",
+          animationName: "auroraMove",
+          animationDuration: "40s",
+          animationTimingFunction: "ease-in-out",
+          animationIterationCount: "infinite",
+          mixBlendMode: "screen",
+          zIndex: 1,
         }}
       />
 
-      {/* Stars */}
       {stars.map((star) => (
         <div
           key={star.id}
@@ -111,14 +150,17 @@ const SpaceBackground = () => {
             height: star.size,
             backgroundColor: star.color,
             opacity: star.opacity,
-            animation: `twinkle ${randomValue(2, 4)}s infinite ease-in-out`, // Varied twinkle speed
+            animationName: "twinkle",
+            animationDuration: `${randomValue(2, 4)}s`,
+            animationTimingFunction: "ease-in-out",
+            animationIterationCount: "infinite",
             animationDelay: star.animationDelay,
-            boxShadow: `0 0 ${randomValue(1, 3)}px ${star.color}`, // Subtle glow
+            boxShadow: `0 0 ${randomValue(1, 3)}px ${star.color}`,
+            transform: `translateZ(${star.depth}px)`
           }}
         />
       ))}
 
-      {/* Shooting stars */}
       {shootingStars.map((s) => (
         <div
           key={s.id}
@@ -128,11 +170,15 @@ const SpaceBackground = () => {
             left: s.left,
             width: s.tailLength,
             height: "2px",
-            animation: `shoot ${s.animationDuration} ${s.animationDelay} cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite`,
+            animationName: "shoot",
+            animationDuration: s.animationDuration,
+            animationTimingFunction: "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+            animationIterationCount: "infinite",
+            animationDelay: s.animationDelay,
             transformOrigin: "left center",
+            transform: `rotate(${s.rotation}deg)`
           }}
         >
-          {/* Star head */}
           <div
             style={{
               width: s.size,
@@ -143,10 +189,9 @@ const SpaceBackground = () => {
               left: 0,
               top: "50%",
               transform: "translateY(-50%)",
-              boxShadow: "0 0 4px 1px rgba(255, 255, 255, 0.8)", // Glowing head
+              boxShadow: "0 0 4px 1px rgba(255, 255, 255, 0.8)",
             }}
           />
-          {/* Trail */}
           <div
             style={{
               position: "absolute",
@@ -156,50 +201,35 @@ const SpaceBackground = () => {
               height: "100%",
               background: "linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.3), transparent)",
               transform: "translateY(-50%)",
-              animation: `tailFade ${s.animationDuration} ${s.animationDelay} cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite`,
-              boxShadow: "0 0 6px rgba(255, 255, 255, 0.5)", // Glowing trail
+              animationName: "tailFade",
+              animationDuration: s.animationDuration,
+              animationTimingFunction: "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+              animationIterationCount: "infinite",
+              animationDelay: s.animationDelay,
+              boxShadow: "0 0 6px rgba(255, 255, 255, 0.5)",
             }}
           />
         </div>
       ))}
 
-      {/* Animations */}
       <style jsx>{`
         @keyframes twinkle {
-          0%,
-          100% {
-            opacity: 0.2;
-          }
-          50% {
-            opacity: 0.8;
-          }
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 0.8; }
         }
-
         @keyframes shoot {
-          0% {
-            transform: translate(0, 0);
-            opacity: 1;
-          }
-          50% {
-            transform: translate(30vw, 40vh) rotate(${({ rotation }) => rotation}deg); /* Dynamic rotation */
-            opacity: 0.7;
-          }
-          100% {
-            transform: translate(60vw, 80vh);
-            opacity: 0;
-          }
+          0% { transform: translate(0, 0); opacity: 1; }
+          50% { transform: translate(30vw, 40vh); opacity: 0.7; }
+          100% { transform: translate(60vw, 80vh); opacity: 0; }
         }
-
         @keyframes tailFade {
-          0% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.7;
-          }
-          100% {
-            opacity: 0;
-          }
+          0% { opacity: 1; }
+          50% { opacity: 0.7; }
+          100% { opacity: 0; }
+        }
+        @keyframes auroraMove {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
         }
       `}</style>
     </div>
