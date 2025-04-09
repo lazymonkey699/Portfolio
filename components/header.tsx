@@ -109,7 +109,7 @@ export function Header() {
         </Link>
       ))}
       <Button variant="outline" className="w-full mt-4 text-white border-white hover:bg-white/10">
-        Let's Connect
+        Let&apos;s Connect
       </Button>
     </div>
   </div>
