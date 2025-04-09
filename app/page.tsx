@@ -69,7 +69,7 @@ export default function Home() {
         <div className="flex-1 space-y-6">
           <h2 className="text-xl font-semibold text-primary">Welcome to my Portfolio</h2>
           <h1 className="text-4xl font-bold sm:text-6xl">
-            Hi! I'm Abhishek Bam
+            Hi! I am Abhishek Bam
           </h1>
           <p className="text-2xl text-primary">
             <span className="typing-animation">
@@ -304,7 +304,7 @@ Let’s connect and create something amazing!
         <Card className="bg-background/50 backdrop-blur-md border-primary/20">
           <CardContent className="p-6 space-y-4">
             <p className="text-center text-lg">
-              I'm always open to new opportunities and collaborations. Feel free to reach out!
+              I am always open to new opportunities and collaborations. Feel free to reach out!
             </p>
             <div className="flex justify-center space-x-4">
               <Button asChild>
